@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!---외부 참조--->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
+
+        * {
+            font-family: "Noto Sans KR", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        /* Class 수정 */
+        .myProfile {
+            width: 900px;
+            height: 524px;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .myOverview {
+            /* 왼쪽 */
+            width: 30%;
+            height: 100%;
+            margin: 5px 0px 0px 2%;
+
+            background-color: green;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .myDetail {
+            /* 너비 = 화면의 70% */
+            width: 67%;
+            height: 100%;
+            margin: 5px 0px 0px 1%;
+            color: white;
+
+            background-color: gray;
+
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            justify-content: top;
+        }
+
+        .mySubDetailBox {
+            /* 오른쪽 내 특징 설명란 공통 설정 값*/
+            width: 95.6%;
+            height: 30%;
+            /* 설명 항목 추가될 때마다 비율 변경해 줘야함 */
+            margin: 2.2% 0px 0px 10px;
+
+            background-color: rgb(150, 150, 150);
+            color: white;
+
+            border-radius: 30px;
+            box-shadow: 0px 0px 4px 0px rgb(75, 75, 75);
+        }
+
+        .overViewText {
+            margin: 20px 0px 0px 15px;
+            /* 줄 간 간격 */
+            line-height: 27px;
+            color: white;
+        }
+
+        /* ID 수정 */
+        #myImage {
+            /* 이미지 크기 */
+            width: 150px;
+            height: 150px;
+            margin-bottom: 15px;
+            /* 둥근 효과 */
+            box-shadow: 0px 0px 3px 0px black;
+            border-radius: 50%;
+            border: 2px solid black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="myProfile">
+        <!----- 왼쪽 영역 ------>
+        <div class="myOverview">
+            <!----- 상단 프로필 사진 ------>
+            <img src="https://images.unsplash.com/photo-1446768500601-ac47e5ec3719?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1446&q=80"
+                id="myImage" alt="profileImage">
+
+
+            <!----- 하단 간단한 자기소개 ------>
+            <h2><span id="myName" style="color:white">김건우</span></h2>
+            <p class="overViewText">
+                <!----- 하이퍼 링크 처리할지 고민 ------>
+                블로그 주소 : <span id="myBlog">https://choni.tistory.com/</span><br>
+                MBTI : <span id="myMBTI">INTP</span>
+            </p>
+        </div>
+
+        <!----- 오른쪽 영역 ------>
+        <div class="myDetail">
+            <!----- 설명 적는 란 ------>
+            <div class="mySubDetailBox">
+                <div class="card-body">
+                    <h5 class="card-title">1.나에 대한 설명 </h5>
+                    <p class="card-text"><span id="myIntro">최대 120글자의 내용</span></p>
+                </div>
+            </div>
+            <div class="mySubDetailBox">
+                <div class="card-body">
+                    <h5 class="card-title">2. 객관적으로 살펴본 자신의 장점</h5>
+                    <p class="card-text"><span id="myStreng">최대 120글자의 내용</span></p>
+                </div>
+            </div>
+            <div class="mySubDetailBox">
+                <div class="card-body">
+                    <h5 class="card-title">3. 자신의 스타일 & 협업 스타일</h5>
+                    <p class="card-text"><span id="myStyle">최대 120글자의 내용</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
