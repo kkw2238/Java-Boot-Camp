@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F1T3 사용설명서</title>
+
+  <!---외부 참조--->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!------------------ Script ------------------>
+
+  <!-- 대현님 Script 코드 블럭 -->
+  <script>
+    function pad(d) {
+      return (d < 10) ? '0' + d.toString() : d.toString();
+    }
+    let today = new Date();
+    //Base_time : 0200, 0500, 0800, 1100, 1400, 1700, 2000, 2300 (1일 8회)
+    let hours = today.getHours();
+    if (hours >= 2 && hours <= 4) hours = 2;
+    else if (hours >= 5 && hours <= 7) hours = 5;
+    else if (hours >= 8 && hours <= 10) hours = 8;
+    else if (hours >= 11 && hours <= 13) hours = 11;
+    else if (hours >= 14 && hours <= 16) hours = 14;
+    else if (hours >= 17 && hours <= 19) hours = 17;
+    else if (hours >= 20 && hours <= 22) hours = 20;
+    else if (hours >= 23 && hours < 2) hours = 23;
+    hours = pad(hours);
+    let year = today.getFullYear();
+    let month = today.getMonth() + 1;
+    month = pad(month);
+    let date = today.getDate();
+    date = pad(date);
+    //      기상청openapi row 0 TMP:기온, row 5 SKY:하늘상태(1:맑음, 3:구름많음, 4:흐림), row 6 PTY:강수형태(없음(0), 비(1), 비/눈(2), 눈(3), 소나기(4)), 좌표x60y127 : 서울 중구
+    let url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=QLd7MuTQb5aff3QveGNLpXM%2BfoDIj6YZTmg2JAGdXFKUlDzUlpLeXX7D6YJIhWn%2Bsic0LVINPF40EjMBJ02YSQ%3D%3D&numOfRows=12&pageNo=2&dataType=JSON&base_date=' + year + month + date + '&base_time=' + hours + '00&nx=60&ny=127';
+    fetch(url).then(res => res.json()).then(data => {
+      let tmp = data['response']['body']['items']['item'][0]['fcstValue'];
+      let sky = data['response']['body']['items']['item'][5]['fcstValue'];
+      let pty = data['response']['body']['items']['item'][6]['fcstValue'];
+      $('#temper').text(tmp);
+      if (pty == 1) {
+        let temp_html = `<img width="96" height="96" src="https://img.icons8.com/emoji/96/umbrella-with-rain-drops.png" alt="umbrella-with-rain-drops" />`;
+        $('#whetherimg').append(temp_html);
+      }
+      else if (sky == 1) {
+        let temp_html = `<img width="96" height="96" src="https://img.icons8.com/emoji/96/sun-emoji.png" alt="sun-emoji" />`;
+        $('#whetherimg').append(temp_html);
+      }
+      else if (sky == 3) {
+        let temp_html = `<img width="96" height="96" src="https://img.icons8.com/emoji/96/sun-behind-large-cloud.png" alt="sun-behind-large-cloud" />`;
+        $('#whetherimg').append(temp_html);
+      }
+      else if (sky == 4) {
+        let temp_html = `<img width="96" height="96" src="https://img.icons8.com/emoji/96/cloud-emoji.png" alt="cloud-emoji" />`;
+        $('#whetherimg').append(temp_html);
+      }
+    })
+  </script>
+
+  <!-- 혜민님 Script 코드 블럭 -->
+  <script type="module">
+    // Firebase SDK 라이브러리 가져오기
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA69XKHXJXHLxyQocSAHT9lINe7z6J3JpQ",
+      authDomain: "sparta-e2330.firebaseapp.com",
+      projectId: "sparta-e2330",
+      storageBucket: "sparta-e2330.appspot.com",
+      messagingSenderId: "776505035257",
+      appId: "1:776505035257:web:666b9e0d1bc73ea8695528",
+      measurementId: "G-6KW12HTPE6"
+    };
+
+
+    // Firebase 인스턴스 초기화
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+
+    //방명록 등록
+    $("#savebtn").click(async function () {
+      let nickname = $("#nicknameInput").val();
+      let pwd = $('#pwdInput').val();
+      let comment = $("#replyInput").val();
+
+      try {
+        let docRef = await addDoc(collection(db, "replys"), {
+          'nickname': nickname,
+          'comment': comment,
+          'pwd': pwd
+        });
+        let id = docRef.id;
+
+        let result = `
+              <div class="allReply">
+                  <div class="comment-item">
+                      <div class="row mb-2" id="replyresult">
+                          ${comment} <br>
+                          by.${nickname} <button type="button" class="btn btn-delete btn-xs" id="deletebtn" data-id="${id}">삭제</button>
+                      </div>
+                  </div>
+              </div>
+          `;
+        $("#myCard").append(result);
+        alert('저장 완료');
+        window.location.reload();
+      } catch (error) {
+        console.error("댓글 등록 오류: " + error);
+        alert('댓글 등록 중 오류 발생');
+      }
+    });
+
+    //DB에서 데이터 불러오기
+    let docs = await getDocs(collection(db, "replys"));
+    docs.forEach((doc) => {
+      let row = doc.data();
+      let id = doc.id;
+
+      let nickname = row['nickname'];
+      let comment = row['comment'];
+
+      let result = `
+                      <div class="allReply">
+                          <div class="comment-item">
+                              <div class="row mb-2" id="replyresult">
+                                  ${comment} <br>
+                                  by.${nickname} <button type="button" class="btn btn-delete btn-xs" id="deletebtn" data-id="${id}">삭제</button>
+                              </div>
+                          </div>
+                      </div>
+                  `;
+      $("#myCard").append(result);
+    });
+
+    // 댓글 삭제를 위한 모달 호출
+    $("#myCard").on("click", ".btn-delete", function () {
+      let docId = $(this).data('id');
+      $("#passwordModal").data('id', docId).modal('show');
+    });
+
+    // 비밀번호 확인 후 댓글 삭제
+    $("#confirmDelete").click(async function () {
+      let docId = $("#passwordModal").data('id');
+      let password = $("#passwordInput").val();
+      try {
+        let docRef = doc(db, "replys", docId);
+        let docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          let docData = docSnap.data();
+          // 비밀번호 확인
+          if (docData.pwd === password) {
+            await deleteDoc(docRef);
+            alert('삭제 완료');
+            $("#passwordModal").modal('hide');
+            window.location.reload();  // 페이지 새로고침
+          } else {
+            alert('비밀번호가 틀렸습니다.');
+          }
+        } else {
+          alert('댓글이 존재하지 않습니다.');
+        }
+      } catch (error) {
+        console.error("문서 삭제 오류: ", error);
+        alert('댓글 삭제 중 오류가 발생했습니다.');
+      }
+    });
+  </script>
+
+  <!-- 동주님 Script 코드 블럭 -->
+  <script type="module">
+
+    // 프로필 숨겨놓기
+    $("#profile1").hide();
+    $("#profile2").hide();
+    $("#profile3").hide();
+    $("#profile4").hide();
+
+    // 다음 버튼 눌렀을 때 내용 지우기
+    $("#btn1").click(async function () {
+      $('#profile2').hide();
+      $('#profile3').hide();
+      $('#profile4').hide();
+    })
+    $("#btn2").click(async function () {
+      $('#profile1').hide();
+      $('#profile3').hide();
+      $('#profile4').hide();
+    })
+    $("#btn3").click(async function () {
+      $('#profile1').hide();
+      $('#profile2').hide();
+      $('#profile4').hide();
+    })
+    $("#btn4").click(async function () {
+      $('#profile1').hide();
+      $('#profile2').hide();
+      $('#profile3').hide();
+    })
+
+    // 토글
+    $("#btn1").click(async function () {
+      $('#profile1').toggle();
+    })
+    $("#btn2").click(async function () {
+      $('#profile2').toggle();
+    })
+    $("#btn3").click(async function () {
+      $('#profile3').toggle();
+    })
+    $("#btn4").click(async function () {
+      $('#profile4').toggle();
+    })
+  </script>
+
+
+  <!------------------ Style ------------------>
+
+  <!-- 공통 -->
+  <style>
+    /* 공용 폰트 ( 임시 ) */
+    @import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Hahmlet:wght@100..900&display=swap");
+
+    * {
+      font-family: "Hahmlet", serif;
+    }
+
+    a {
+      text-decoration-line: none;
+      color: white;
+    }
+
+    .container {
+      background-color: rgb(220, 220, 220);
+    }
+  </style>
+
+  <!-- 대현님 Style 코드 블럭 -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
+
+    .title {
+      color: black;
+      font-size: 90px;
+      padding-left: 30px;
+      font-family: "Roboto", sans-serif;
+      height: 110px;
+    }
+
+    ul {
+      margin-top: 30px;
+      margin-right: 30px;
+    }
+  </style>
+
+  <!-- 건우님 Style 코드 블럭 -->
+  <style>
+    /* Class 수정 */
+    .myProfile {
+      width: 100%;
+      height: 524px;
+      display: flex;
+      flex-direction: row;
+
+      margin: 0px auto 0px auto;
+
+      justify-content: center;
+    }
+
+    .myOverview {
+      /* 왼쪽 */
+      width: 25%;
+      margin: 5px 0px 0px 0px;
+
+      background-color: grey;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .myDetail {
+      /* 너비 = 화면의 70% */
+      width: 72%;
+      margin: 5px 0px 0px 1%;
+      color: white;
+
+      display: flex;
+      flex-direction: column;
+      align-items: left;
+      justify-content: top;
+    }
+
+    .mySubDetailBox {
+      /* 오른쪽 내 특징 설명란 공통 설정 값*/
+      width: 90%;
+      height: 30%;
+      /* 설명 항목 추가될 때마다 비율 변경해 줘야함 */
+      margin: 2.2% 0px 0px 50px;
+
+      background-color: rgb(150, 150, 150);
+      color: white;
+
+      border-radius: 10px;
+      box-shadow: 0px 0px 4px 0px rgb(75, 75, 75);
+    }
+
+    .overViewText {
+      margin: 20px 0px 0px 15px;
+      /* 줄 간 간격 */
+      line-height: 27px;
+      color: white;
+    }
+
+    .card-title {
+      font-size: 23px;
+    }
+
+    .myImage {
+      /* 이미지 크기 */
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+
+      margin-bottom: 15px;
+      /* 둥근 효과 */
+      box-shadow: 0px 0px 3px 0px black;
+      border-radius: 50%;
+      border: 1px solid rgb(107, 107, 107);
+    }
+
+    /* ID 수정 */
+
+    /* 이미지 디테일한 위치 수정 */
+    #daehyunImageDetail,
+    #kunwooImageDetail,
+    #hyeminImageDetail {
+      object-position: 20% 20%;
+    }
+
+    
+    #dongjuImageDetail {
+      background-image: url('https://blogpfthumb-phinf.pstatic.net/MjAyMzA3MTNfMTI5/MDAxNjg5MjE5MjExOTkw.LSGkKhjRowm2dLOIjjlRmKUgVtu1Q77Ua6UfqUKJ5N0g.cll8sFQbfI0vCrPttQEAnSx6n51m62R6aExkGfxUPZIg.JPEG.ghkdehdwn/IMG_4945.jpg/IMG_4945.jpg?type=w161');
+      background-position: center;
+      background-size: cover;
+    }
+
+    #myName {
+      color: white;
+    }
+
+    #myIntro,
+    #myStreng,
+    #myStyle {
+      font-size: 17px;
+    }
+  </style>
+
+  <!-- 혜민님 Style 코드 블럭 -->
+  <style>
+    /* 댓글 목록 컨테이너 스타일 */
+    .comment-container {
+      max-height: 300px;
+      /* 최대 높이 설정 */
+      overflow-x: hidden;
+      /* X축 스크롤 숨김 */
+      overflow-y: auto;
+      /* 수직 스크롤바 활성화 */
+      border: 1px solid #dee2e6;
+      /* 외부 테두리 */
+      border-radius: 0.375rem;
+      /* 테두리 둥글기 */
+      padding: 0.5rem;
+      /* 안쪽 여백 */
+      background-color: #f8f9fa;
+      /* 배경색 */
+    }
+
+    /* 댓글 항목 스타일 */
+    .comment-item {
+      padding: 5px 20px 0px 20px;
+      /* 안쪽 여백 */
+      margin-bottom: 0.5rem;
+      /* 아래 여백 */
+      border: 1px solid #ced4da;
+      /* 댓글 항목 테두리 */
+      border-radius: 0.375rem;
+      /* 테두리 둥글기 */
+      background-color: #fff;
+      /* 댓글 배경색 */
+    }
+
+    /* 삭제 버튼 스타일 */
+    .btn-xs {
+      font-size: 10px;
+      /* 버튼 글자 크기 */
+      padding: 0.2rem 0.5rem 0.2rem 0.5rem;
+      /* 버튼의 상하 여백과 좌우 여백 */
+      line-height: 1.5;
+      /* 버튼의 줄 높이 */
+      border-radius: 0.2rem;
+      /* 버튼 모서리 둥글기 */
+      width: 40px;
+      margin: -20px 10px 0px 85%;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+      /* 삭제 버튼 배경색 (붉은색) */
+      color: #fff;
+      /* 버튼 글자색 (흰색) */
+      border: 1px solid #dc3545;
+      /* 버튼 테두리 색 (붉은색) */
+    }
+
+    .btn-delete:hover {
+      background-color: #c82333;
+      /* 버튼 호버 시 배경색 */
+      border-color: #bd2130;
+      /* 버튼 호버 시 테두리 색 */
+    }
+
+    #myCard {
+      overflow-x: hidden;
+      /* X축 스크롤 숨김 */
+      overflow-y: auto;
+      /* Y축 스크롤을 활성화 */
+      padding: 10px;
+      /* 내용과 테두리 사이의 여백 */
+      border: 1px solid #ddd;
+      /* 테두리 색상 */
+      border-radius: 5px;
+      /* 테두리 둥글게 */
+      background-color: #f9f9f9;
+      /* 배경 색상 */
+      margin-bottom: 20px;
+      /* 아래쪽 여백 */
+      height: 346px;
+    }
+
+    .carousel-item img {
+      object-fit: cover;
+      /* 이미지가 컨테이너의 전체를 채우도록 설정 */
+    }
+
+    .col-8 {
+      padding: 10px;
+    }
+
+    .col-4 {
+      border: 1px solid #ddd;
+      /* 테두리 색상 */
+      border-radius: 5px;
+      /* 테두리 둥글게 */
+      padding: 15px;
+    }
+
+    .form-floating {
+      margin: 5px 0px 5px 0px;
+    }
+
+    /* 슬라이드 화살표 아이콘 색 변경 */
+    .carousel-control-prev-icon {
+      background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23000' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E") !important;
+    }
+
+    .carousel-control-next-icon {
+      background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23000' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E") !important;
+    }
+  </style>
+
+  <!-- 동주님 Style 코드 블럭 -->
+  <style>
+    .myIcon {
+      background-color: rgb(234, 185, 95);
+      height: 200px;
+      margin: 70px auto 10px auto;
+    }
+
+    .myIcon>.icon {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .myIcon>.icon>button {
+      margin: 50px 73px -3px 73px;
+      border-radius: 48%;
+      border-color: transparent;
+    }
+
+    .myIcon>.icon>#btn1 {
+      background-color: rgb(254, 188, 199);
+    }
+
+    .myIcon>.icon>#btn2 {
+      background-color: rgb(192, 239, 121);
+    }
+
+    .myIcon>.icon>#btn3 {
+      background-color: rgb(239, 237, 111);
+    }
+
+    .myIcon>.icon>#btn4 {
+      background-color: rgb(142, 206, 240);
+    }
+
+    .myIcon>.more {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 215px 0 215px;
+    }
+
+    .myProfile {
+      background-color: beige;
+      margin: 10px auto 10px auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!--- 대현님 코드블럭 : 헤드 --->
+    <div class="container">
+      <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <span class="title">F1T3</span>
+        </a>
+        <ul>서울 중구 : <span id="temper"></span>도 <span id="whetherimg"></span>
+        </ul>
+      </header>
+    </div>
+
+    <!--- 혜민님 코드블럭 : 방명록 및 소개 -->
+    <div class="container">
+      <div class="row">
+        <div class="col-8">
+          <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="true">
+            <div class="carousel-indicators">
+              <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+              <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+              <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+              <div class="carousel-item ">
+                <img src="https://i.ibb.co/cg4b276/team.png" class="d-block w-100" alt="...">
+              </div>
+              <div class="carousel-item ">
+                <img src="https://i.ibb.co/fq1PTkL/rule.png" class="d-block w-100" alt="...">
+              </div>
+              <div class="carousel-item active">
+                <img src="https://i.ibb.co/mJ1kKqL/future.png" class="d-block w-100" alt="...">
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+              data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+              data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+        <div class="col-4">
+          <h3>방명록</h3>
+          <div class="postingbox" id="postingbox">
+            <div class="row g-2">
+              <div class="col-5">
+                <div class="form-floating-sm">
+                  <input type="text" class="form-control" id="nicknameInput" placeholder="귀염둥이">
+                  <label for="nicknameInput">닉네임</label>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-floating-sm">
+                  <input type="text" class="form-control" id="pwdInput">
+                  <label for="pwdInput">비밀번호</label>
+                </div>
+              </div>
+            </div>
+            <div class="row g-2">
+              <div class="col-7">
+                <div class="form-floating-sm">
+                  <input type="text" class="form-control" id="replyInput" placeholder="화이팅">
+                  <label for="replyInput">응원의 한마디</label>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="btn">
+                  <button type="submit" class="btn btn-primary" id="savebtn">
+                    기록
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="comment-container">
+            <div id="myCard">
+              <!-- 방명록 리스트 -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- 비밀번호 입력 모달 -->
+    <div id="passwordModal" class="modal fade" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="passwordModalLabel">비밀번호 입력</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="passwordInput" class="form-label">비밀번호</label>
+              <input type="text" class="form-control" id="passwordInput" placeholder="비밀번호를 입력하세요">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+            <button type="button" class="btn btn-primary" id="confirmDelete">삭제</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--- 동주님 코드블럭 : 아이콘 & 더 보기 -->
+    <div class="container">
+      <section class="myIcon">
+        <div class="icon">
+          <button id="btn1">
+            <img src="https://img.icons8.com/?size=100&id=waj9ZJ0ANYA7&format=png&color=000000" alt="icon" title="건우"
+              width="100px">
+          </button>
+          <button id="btn2">
+            <img src="https://img.icons8.com/?size=100&id=Boid91lo2CU0&format=png&color=000000" alt="icon" title="대현"
+              width="100px"></button>
+          <button id="btn3">
+            <img src="https://img.icons8.com/?size=100&id=iy7s412RVvVR&format=png&color=000000" alt="icon" title="동주"
+              width="100px"></button>
+          <button id="btn4">
+            <img src="https://img.icons8.com/?size=100&id=dDgRd3IesMLM&format=png&color=000000" alt="icon" title="혜민"
+              width="100px"></button>
+        </div>
+        <div class="more">
+          <div class="more1">more▽</div>
+          <div class="more2">more▽</div>
+          <div class="more3">more▽</div>
+          <div class="more4">more▽</div>
+        </div>
+      </section>
+
+      <!--- 건우님 코드라인 - 자기 소개 라인 -->
+      <div class="myProfile" style="height: 700px;" id="profile1">
+        <!----- 왼쪽 영역 ------>
+        <div class="myOverview">
+          <!----- 상단 프로필 사진 ------>
+          <img src="https://blog.kakaocdn.net/dn/cn0jCR/btsICTqsGjT/05Fu29pyoOXC5XSAr3UJ7k/img.jpg" class="myImage"
+            id="kunwooImageDetail" alt="profileImage">
+
+
+          <!----- 하단 간단한 자기소개 ------>
+          <h2><span id="myName">김건우</span></h2>
+          <p class="overViewText">
+            <!----- 하이퍼 링크 처리할지 고민 ------>
+            블로그 <br><a href="https://choni.tistory.com/">https://choni.tistory.com/</a><br>
+            <span id="myMBTI">INTP</span>
+          </p>
+        </div>
+
+        <!----- 오른쪽 영역 ------>
+        <div class="myDetail">
+          <!----- 설명 적는 란 ------>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">1.나에 대한 설명 </h5>
+              <p class="card-text"><span id="myIntro">게임 개발 전공하다 백엔드로 넘어온
+                  김건우입니다.<br>
+                  Java와 Back-End는 처음인 만큼, 초심으로 돌아가 공부하고 있습니다.</span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">2. 객관적으로 살펴본 자신의 장점</h5>
+              <p class="card-text"><span id="myStreng">평소에는 장난이 많지만, 흥미로운 것이
+                  생기거나
+                  코드 짤 때 만큼은 정반대의 모습으로 진지하게 임합니다.<br>
+                  또한, 해야할 일에 대해 데드라인을 잘 지킵니다.
+                </span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">3. 자신의 스타일 & 협업 스타일</h5>
+              <p class="card-text"><span id="myStyle">팀원의 아이디어를 최대한 존중하고, 모든
+                  가능성을
+                  열어두며 협업을 진행합니다.<br>
+                  프로젝트에 있어 내 스킬이 부족할 경우, 부족한 만큼 더 성실히 공부하여 어떤 역할을 맡게 되더라도
+                  소화해냅니다.
+                </span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!----- 대현님 프로필 ------>
+      <div class="myProfile" style="height: 700px;" id="profile2">
+        <div class="myOverview">
+          <!----- 상단 프로필 사진 ------>
+          <img src="https://i.ibb.co/PCSGnxx/P20170109-203100996-9-A42-F2-F5-989-F-4-F0-E-AA0-B-B12-DD14-CF876.jpg"
+            class="myImage" id="daehyunImageDetail" alt="profileImage">
+
+
+          <!----- 하단 간단한 자기소개 ------>
+          <h2><span id="myName">박대현</span></h2>
+          <p class="overViewText">
+            <!----- 하이퍼 링크 처리할지 고민 ------>
+            블로그 <br><a href="https://velog.io/@pdh6113/posts">https://velog.io/@pdh6113/posts</a><br>
+            <span id="myMBTI">ISFJ</span>
+          </p>
+        </div>
+
+        <!----- 오른쪽 영역 ------>
+        <div class="myDetail">
+          <!----- 설명 적는 란 ------>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">1.나에 대한 설명 </h5>
+              <p class="card-text"><span id="myIntro">대모거북 대(玳) 검을 현(玄). 검은 거북이를
+                  의미하는 제 이름은 박대현입니다.<br>
+                  이름처럼 느리더라도 꾸준함으로 끝까지 경주를 완주하는 끈기를 보여드리겠습니다</span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">2. 객관적으로 살펴본 자신의 장점</h5>
+              <p class="card-text"><span id="myStreng">팀프로젝트에서 각자 역할이나 시간계획을
+                  정할때,
+                  개인간의 일정이나 역량에 따라 역할배분 및 조율을 잘할수 있습니다.</span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">3. 자신의 스타일 & 협업 스타일</h5>
+              <p class="card-text"><span id="myStyle">최대한 빨리 익혀서 스스로의 레벨을 키우는데에
+                  중점을 두고, <br>협업하는 팀원에게 먼저 업무분담 선택권을 주고 다른 부분을 해내어 기여하려는
+                  스타일입니다.</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!----- 동주님 프로필 ------>
+      <div class="myProfile" style="height: 700px;" id="profile3">
+        <!----- 왼쪽 영역 ------>
+        <div class="myOverview">
+          <!----- 상단 프로필 사진 ------>
+          <img src='' class="myImage" id="dongjuImageDetail" alt="profileImage">
+
+          <!----- 하단 간단한 자기소개 ------>
+          <h2><span id="myName">황동주</span></h2>
+          <p class="overViewText">
+            <!----- 하이퍼 링크 처리할지 고민 ------>
+            블로그 <br><a href="https://velog.io/@jju/posts">https://velog.io/@jju/posts</a><br>
+            <span id="myMBTI">ISTP</span>
+          </p>
+        </div>
+
+        <!----- 오른쪽 영역 ------>
+        <div class="myDetail">
+          <!----- 설명 적는 란 ------>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">1.나에 대한 설명 </h5>
+              <p class="card-text"><span id="myIntro">대뜸 백엔드를 공부하겠다고 부트캠프에 지원한
+                  비전공자 <br> 1인분을 하기 위해 최선을 다하겠습니당</span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">2. 객관적으로 살펴본 자신의 장점</h5>
+              <p class="card-text"><span id="myStreng">함께 또는 혼자 하는 것을 다 좋아해서
+                  <br>
+                  맞춤형
+                  인간이지 않을까 싶습니다.</span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">3. 자신의 스타일 & 협업 스타일</h5>
+              <p class="card-text"><span id="myStyle">온보딩 기간에 하는 협업이 처음인지라 잘
+                  모르겠습니다. <br> 나름 적극적인 참여를 하는 중이라 뿌듯합니다.</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!----- 혜민님 프로필 ------>
+      <div class="myProfile" style="height: 700px;" id="profile4">
+        <!----- 왼쪽 영역 ------>
+        <div class="myOverview">
+          <!----- 상단 프로필 사진 ------>
+          <img
+            src="https://slack-imgs.com/?c=1&o1=ro&url=https%3A%2F%2Fimg1.daumcdn.net%2Fthumb%2FR1280x0%2F%3Fscode%3Dmtistory2%26fname%3Dhttps%253A%252F%252Fblog.kakaocdn.net%252Fdn%252F2TleQ%252FbtsID4EI92f%252Fl9bXlxyHfH9k4wLS2EM8Kk%252Fimg.jpg"
+            class="myImage" id="hyeminImageDetail" alt="profileImage">
+
+
+          <!----- 하단 간단한 자기소개 ------>
+          <h2><span id="myName">양혜민</span></h2>
+          <p class="overViewText">
+            <!----- 하이퍼 링크 처리할지 고민 ------>
+            블로그 <br><a href="https://asitwas729.tistory.com/">https://asitwas729.tistory.com/</a><br>
+            <span id="myMBTI">INTJ</span>
+          </p>
+        </div>
+
+        <!----- 오른쪽 영역 ------>
+        <div class="myDetail">
+          <!----- 설명 적는 란 ------>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">1.나에 대한 설명 </h5>
+              <p class="card-text"><span id="myIntro">
+                  ⭐ 2001년생(만 23세)<br>
+                  ⭐ 전문대(전공:컴퓨터) 올해 졸업<br>
+                  ⭐ 재작년부터 Java+Spring만을 주력으로 공부해왔음(잘하지는 않는듯...,)<br>
+                  ⭐ 요새 자주 하는 운동: 웨이트, 인터벌러닝<br>
+                  ⭐ 내향형이라 혼자 있는 시간이 꼭 필요</span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">2. 객관적으로 살펴본 자신의 장점</h5>
+              <p class="card-text"><span id="myStreng">
+                  ⭐ 호기심이 많다.<br>
+                  ⭐ 시간약속을 잘 지킨다.<br>
+                  ⭐ 자기주도적이다.<br>
+                  ⭐ 회복력이 좋다.<br>
+                  ⭐ 계획적이다.<br></span></p>
+            </div>
+          </div>
+          <div class="mySubDetailBox">
+            <div class="card-body">
+              <h5 class="card-title">3. 자신의 스타일 & 협업 스타일</h5>
+              <p class="card-text"><span id="myStyle">
+                  ⭐ 도전을 재밌어한다<br>
+                  ⭐ 주기적인 상황보고 및 회의<br>
+                  ⭐ 더 좋은 아이디어가 생기면 처음부터 다시 만들기도 함<br>
+                  ⭐ 시간약속 중요하게 생각<br>
+                  ⭐ 솔선수범<br></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
