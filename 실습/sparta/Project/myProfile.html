@@ -11,6 +11,7 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <style>
+        /* 폰트 임시 사용 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
 
         * {
@@ -72,7 +73,7 @@
         }
 
         .overViewText {
-            margin: 20px 0px 0px 15px;
+            margin: 20px 0px 0px 0px;
             /* 줄 간 간격 */
             line-height: 27px;
             color: white;
@@ -94,7 +95,7 @@
 
 <body>
 
-    <div class="myProfile">
+    <section class="myProfile">
         <!----- 왼쪽 영역 ------>
         <div class="myOverview">
             <!----- 상단 프로필 사진 ------>
@@ -103,11 +104,11 @@
 
 
             <!----- 하단 간단한 자기소개 ------>
-            <h2><span id="myName" style="color:white">김건우</span></h2>
             <p class="overViewText">
+                이름 : <span id="myName">김건우</span><br>
                 <!----- 하이퍼 링크 처리할지 고민 ------>
-                블로그 주소 : <span id="myBlog">https://choni.tistory.com/</span><br>
-                MBTI : <span id="myMBTI">INTP</span>
+                블로그 주소 : <br><span id="myBlog">https://choni.tistory.com/</span><br>
+                MBTI : <span id="myMBTI">INTP</span><br>
             </p>
         </div>
 
@@ -133,7 +134,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </body>
 
 </html>
