@@ -1,0 +1,152 @@
+<diagram program="umletino" version="15.1"><zoom_level>11</zoom_level><help_text>---------------------------------
+|           Score               |
+---------------------------------
+| - round: final int = 10       |
+---------------------------------
+| - studentId: Long             |
+| - subjectId: Long             |
+| - subType: String             |
+| - scores: int[10]             |
+| - ranks: char[10]             |
+---------------------------------
+| + Score(studentId: Long,      |
+|         subjectId: Long,      |
+|         subtype: String)      |
+---------------------------------
+| + getStudentId(): Long        |
+| + getSubjectId(): Long        |
+| + getScores(): int[]          |
+| + setScores(round: int,       |
+|            score: int): void  |
+| + getRank(): char[]           |
+| + setRank(ranks: char[]): void|
+---------------------------------</help_text><element><id>UMLClass</id><coordinates><x>1804</x><y>1903</y><w>231</w><h>209</h></coordinates><panel_attributes>RequiredSubject
+{extends Subject}
+--
+-id: Long
+_-ClassAttribute: Long_
+--
+#Operation(i: int): int
+/+AbstractOperation()/
+--
+Responsibilities
+-- Resp1
+*-- Resp2*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2079</x><y>1903</y><w>231</w><h>209</h></coordinates><panel_attributes>ElectiveSubject
+{extends Subject}
+--
+-id: Long
+_-ClassAttribute: Long_
+--
+#Operation(i: int): int
+/+AbstractOperation()/
+--
+Responsibilities
+-- Resp1
+*-- Resp2*</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1947</x><y>1606</y><w>231</w><h>253</h></coordinates><panel_attributes>Subject( 강의 )
+{Some Properties}
+--
+#score: int[10] ? List ?
+#grade: char[10] 
+#subjectTitle: String
+#subjectNo:int
+#isRequired:boolean
+--
+/+addScore(int, int):boolean/
++getGrade(int) : char
+--
+Responsibilities
+-- Resp1
+*-- Resp2*</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1914</x><y>1848</y><w>154</w><h>77</h></coordinates><panel_attributes>lt=.&gt;
+&lt;&lt;extends&gt;&gt;</panel_attributes><additional_attributes>10;50;120;10</additional_attributes></element><element><id>Relation</id><coordinates><x>2035</x><y>1848</y><w>165</w><h>77</h></coordinates><panel_attributes>lt=.&gt;
+&lt;&lt;extends&gt;&gt;</panel_attributes><additional_attributes>130;50;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>1705</x><y>1650</y><w>231</w><h>66</h></coordinates><panel_attributes>새로운 Class를 선언해서 
+Score와 grade를 함께 관리 할 것인지 
+판단 필요
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1430</x><y>1485</y><w>231</w><h>209</h></coordinates><panel_attributes>&lt;&lt;Stereotype&gt;&gt;
+Student
+{Some Properties}
+--
+-id: Long
+_-ClassAttribute: Long_
+--
+#Operation(i: int): int
+/+AbstractOperation()/
+--
+Responsibilities
+-- Resp1
+*-- Resp2*</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1496</x><y>1683</y><w>473</w><h>121</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>20;10;10;50;14;85;410;60</additional_attributes></element><element><id>UMLClass</id><coordinates><x>682</x><y>451</y><w>330</w><h>286</h></coordinates><panel_attributes>&lt;&lt;Stereotype&gt;&gt;
+Student
+{Some Properties}
+--
+- studentId: Long
+- studentName: String
+- subjects: List&lt;Long&gt;
+- status: String
+--
++ Student(studentId: Long, studentName: String, subjects: List&lt;Long&gt;, status: String)
++ setStudentId(studentId: Long): void
++ setStudentName(studentName: String): void
++ setSubjects(subjects: List&lt;Long&gt;): void
++ setStatus(status: String): void
++ getStudentId(): Long
++ getStudentName(): String
++ getSubjects(): List&lt;Long&gt;
++ getStatus(): String
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>330</x><y>55</y><w>363</w><h>330</h></coordinates><panel_attributes>&lt;&lt;Stereotype&gt;&gt;
+main
+--
+- PATTERN_ONLY_INTEGER: String
+- PATTERN_ONLY_1_BETWEEN_10: String
+- PATTERN_ONLY_0_BETWEEN_100: String
+--
+- tmpSubjects: List&lt;Long&gt;
+--
+- studentStore: List&lt;Student&gt;
+- subjectStore: List&lt;Subject&gt;
+- scoreStore: List&lt;Score&gt;
+--
+- dataManager: DataManager
+- dummyDataFactory: DummyDataFactory
+--
+- studentIndex: long
+- subjectIndex: long
+- scoreIndex: long
+--
+&lt;&lt;Static&gt;&gt;
++ INDEX_TYPE_STUDENT: String = "ST"
++ INDEX_TYPE_SUBJECT: String = "SU"
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>517</x><y>374</y><w>352</w><h>99</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;300;70</additional_attributes></element><element><id>UMLClass</id><coordinates><x>407</x><y>451</y><w>231</w><h>209</h></coordinates><panel_attributes>&lt;&lt;Stereotype&gt;&gt;
+Subject
+{Some Properties}
+--
+- subjectId: Long
+- subjectName: String
+- subjectType: SUBJECT_TYPE
+--
++ Subject(subjectId: Long, subjectName: String, subjectType: SUBJECT_TYPE)
++ getSubjectId(): Long
++ getSubjectName(): String
++ getSubjectType(): SUBJECT_TYPE</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>451</y><w>231</w><h>352</h></coordinates><panel_attributes>&lt;&lt;Stereotype&gt;&gt;
+Score
+{Some Properties}
+--
+- round: final int = 10
+--
+- studentId: Long             
+- subjectId: Long             
+- subType: String             
+- scores: int[10]             
+- ranks: char[10]             
+--
++ Score(studentId: Long,  
+	 subjectId: Long,      
+         subtype: String)      
+--
++ getStudentId(): Long     
++ getSubjectId(): Long      
++ getScores(): int[]          
++ setScores(round: int,     
+            score: int): void  
++ getRank(): char[]          
++ setRank(ranks: char[]): void|
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>253</x><y>374</y><w>297</w><h>99</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>250;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>517</x><y>374</y><w>33</w><h>99</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element></diagram>

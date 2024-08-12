@@ -1,0 +1,33 @@
+html는 head와 body로 나뉜다
+head : 페이지에 보이지 않는 것 / 홈페이지 이름, 아이콘 
+body : 페이지에 보이는 모든 것 / ex 뼈대 tag
+
+body tag역할
+	1. div : 구역을 나누는 태그
+	2. p : 문단
+	3. ul : unordered list, 순서 없는 HTML 리스트를 정의 할 때 사용된다. 검은 점이나 사각형으로 표시
+	4. ol : ordered list, 순서 있는 HTML 리스트를 정의 할 때 사용된다. 숫자로 표ㅎ시
+	5. li : list 
+
+class : 이름을 정해주는 역할 / 이를 꾸며주기 위해선 
+style 태그를 head에 작성해야한다.
+	.class명 {
+		꾸밀 내용
+	}
+의 형태로 작성
+
+
+h1 h5 background-image background-size
+padding 안쪽 여백
+margin 바깥쪽 여백
+
+.mytitle > button 
+
+Nav는 다른 곳으로 이동하기 위한 방식
+-> 그렇기에 우리 방식을 사용할 경우 혼란을 야기할 수 있다.
+-> article을 사용하는 것이 제일 무난하다 
+
+html5 layour article 
+
+영역별로 class명을 정해두고 시작하면 합칠 때 문제 없다.
+구역 나누는데 특화된 flex
